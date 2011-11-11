@@ -2,22 +2,47 @@
 
 require 'optparse'
 begin
-  require 'netloc'
-rescue LoadError
+#  require 'netloc'
+#rescue LoadError
   require File.expand_path '../../lib/netloc.rb', __FILE__
 end
-
+options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: netloc [<since>..<until>]"
+  opts.banner = "Usage: #{opts.program_name} [<since> [<until>]] options"
 
-  opts.on('-h', '--help', 
-   "Show the help version of this gem") do 
+  opts.on('-h', "Show thge help version of this gem") do 
     puts opts; exit
   end
-
+  opts.on('-v',"Verbose") do
+    options[:verbose] = true
+  end
+  opts.on('--author=name', "Limit commits to given author") do | name |
+    options[:author] = name
+  end
+  opts.on('--apps=regex', 
+          "Regular Expression for matching files to include in application stats; "+
+          "default is to match everything under app/ and all *.rb files") do | expr |
+    options[:app_regex] = expr
+  end
+  opts.on('--include=regex', 
+            "Regular Expression for narrowing the body of files to examine; "+
+            "default is to match everything") do | expr |
+    options[:include_regex] = expr
+  end
+    
+  opts.on('--tests=regex', 
+          "Regular Expression for matching files to include in test stats; "+
+          "default is to match everything under test/") do | expr |
+    options[:app_regex] = expr
+  end
+  opts.separator ""
+  opts.separator "example: #{opts.program_name} 'master@{1 week ago}' --author='Bill Kayser' --include=app/models"
+  opts.separator ""
+  
 end.parse!
-
-Netloc.new.run
+argv = ARGV.dup
+options[:since], options[:until] = *argv
+Netloc.new(options).run
 
 
 
