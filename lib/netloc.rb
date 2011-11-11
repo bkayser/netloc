@@ -49,14 +49,14 @@ class Netloc
   end
   
   def process_line added, removed, file
-#    puts "processing #{file}..." if @verbose
+    puts "processing #{'%+6i'%added.to_i}/#{'%-+6i'%(-removed.to_i)}#{file}" if @verbose
     return if @include && @include !~ file
     @files << file
     case file
       when @test_regex
-        @tests <<  [added.to_i, removed.to_i]
+        @tests <<  [added.to_i, -removed.to_i]
       when @app_regex
-        @apps <<   [added.to_i, removed.to_i]
+        @apps <<   [added.to_i, -removed.to_i]
       else
         @others << [added.to_i, removed.to_i]
     end
