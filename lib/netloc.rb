@@ -3,6 +3,7 @@ require 'set'
 class Netloc
 
   def initialize(options) 
+    @io = options[:out] || STDOUT
     @to = options[:until] || 'HEAD'
     @from = options[:since] || 'HEAD^'
     @verbose = options[:verbose]
@@ -19,7 +20,7 @@ class Netloc
     command << " '--pretty=format:<%h> <%an> %s'"
     command << " '--author=#{@author}'" if @author
     @output = `#{command}`.split("\n").map(&:chomp)
-    exit if $? != 0
+    raise "command failed: '#{command}'" if $? != 0
     parse
     report
   end
@@ -33,14 +34,14 @@ class Netloc
       if line =~ /^(\d+)\s+(\d+)\s+(.*)$/
         process_line $1, $2, $3
       elsif line =~ /^<(.*?)> <(.*?)> (.*)$/
-        puts "#$1   #$3 (#$2)" if @verbose
+        @io.puts "#$1   #$3 (#$2)" if @verbose
       end
     end
   end
   
   def report
     for label, value in [["app code", @apps],['test code', @tests],['other', @others]] do
-      puts "#{'%14s'%label}:  #{net(value)} lines in #{value.size} files" unless value.empty?
+      @io.puts "#{'%14s'%label}:  #{net(value)} lines in #{value.size} files" unless value.empty?
     end
   end
   
@@ -49,7 +50,7 @@ class Netloc
   end
   
   def process_line added, removed, file
-    puts "processing #{'%+6i'%added.to_i}/#{'%-+6i'%(-removed.to_i)}#{file}" if @verbose
+    @io.puts "processing #{'%+6i'%added.to_i}/#{'%-+6i'%(-removed.to_i)}#{file}" if @verbose
     return if @include && @include !~ file
     @files << file
     case file
