@@ -1,7 +1,9 @@
 # encoding: utf-8
+# Bill Kayser
 
-require 'rubygems'
+ require 'rubygems'
 require 'bundler'
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -12,6 +14,7 @@ end
 require 'rake'
 
 require 'jeweler'
+
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
   gem.name = "netloc"
@@ -37,4 +40,4 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :default => :test
-
+        

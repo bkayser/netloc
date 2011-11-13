@@ -17,6 +17,7 @@ class Netloc
     command = "git log #{@from}..#{@to}"
     command << " --numstat"
     command << " --oneline"
+    command << " --ignore-all-space"
     command << " '--pretty=format:<%h> <%an> %s'"
     command << " '--author=#{@author}'" if @author
     @output = `#{command}`.split("\n").map(&:chomp)
@@ -37,16 +38,26 @@ class Netloc
         @io.puts "#$1   #$3 (#$2)" if @verbose
       end
     end
+    @io.puts "no activity found." if @files.empty?
   end
   
   def report
     for label, value in [["app code", @apps],['test code', @tests],['other', @others]] do
-      @io.puts "#{'%14s'%label}:  #{net(value)} lines in #{value.size} files" unless value.empty?
+      next if value.empty?
+      net = net(value)
+      @io.puts "#{label}:"
+      @io.puts "    #{'%7i' % value.size} files modified"
+      @io.puts "    #{'%7i' % size_of_changes(value)} lines changed"
+      @io.puts "    #{'%+7i' % net} net lines #{ net >= 0 ? 'added' : 'removed'}"
     end
   end
   
   def net(values)
-    '%+7i' % values.flatten.reduce{|a,b| a + b }
+    values.flatten.reduce{|a,b| a + b }
+  end
+  
+  def size_of_changes(values)
+    values.flatten.reduce{|a,b| (a > 0 ? a : 0) + (b > 0 ? b : 0) }
   end
   
   def process_line added, removed, file
