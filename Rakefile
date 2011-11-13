@@ -21,7 +21,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/bkayser/netloc"
   gem.license = "MIT"
   gem.summary = %Q{Report on summary changes in a commit}
-  gem.version = '1.0.0'
+  gem.version = '1.0.1'
   gem.description = <<-EOF
 Print a report showing a summary of changes between two commits
 in terms of the net number of lines added or subtracted.  Broken out

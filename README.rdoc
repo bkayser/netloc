@@ -1,8 +1,35 @@
 = netloc
 
-Description goes here.
+What can you infer about the quality or risk of a refactoring of code based strictly
+on the number of lines added and removed in a commit?  Maybe a little, maybe a lot.  If
+you believe it's a pointless exercise then safe yourself some time and skip this gem.  
+If you have an open mind, read on.
+
+In the world of refactoring, it would be ludicrous to suggest that improvement only comes
+by removing dead code, simplifying existing code, and reducing redundancy.  If that were true
+then great programs would start big, and get smaller and smaller over time.  On the other hand
+really good refactoring often does result in a net decrease in lines of code.  And, conversely, 
+changes that result in large masses of code being bolted on to an existing code base in
+one big drop could be considered risky and at the very least flagged for further review.
+
+These principles don't apply to test code, though.  Generally you want to see test code expanded,
+at least in proportion to the application code being added.  You certainly don't want to see
+changes to a lot of application code without ANY changes to test code.  That would clearly raise
+a red flag.
+
+This is a utility I wrote to do some reporting on repository activity.  It can be used with
+any git repo.  You could use it to flag risky changesets, or call out what appear to be
+great refactoring or technical debt paydown.  You could use it to run weekly reports of developer 
+activity and get a sense of the individual engineering styles on a team by comparing the statistics
+of peers over time.
+
+Is this completely superficial?  Perhaps.  It's really just an experiment, an ongoing work.  
+Right now it just shows some statistics on the "net" lines of code added to application code and test code.  
+Maybe over time we'll figure out some statistics that might provide more insight.
 
 == Contributing to netloc
+
+Boilerplate, but still relevant:
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
@@ -14,6 +41,5 @@ Description goes here.
 
 == Copyright
 
-Copyright (c) 2011 Bill Kayser. See LICENSE.txt for
-further details.
+Copyright (c) 2011 Bill Kayser, New Relic, Inc. See LICENSE.txt for further details.
 
