@@ -1,8 +1,14 @@
 require 'set'
-
+$LOAD_PATH.unshift File.dirname(__FILE__)
 class Netloc
 
-  def initialize(options) 
+  require 'netloc/score.rb'
+  require 'netloc/evaluator.rb'
+  
+  attr_reader :scores
+  
+  def initialize(options)
+    @scores = []
     @io = options[:out] || STDOUT
     @to = options[:until] || 'HEAD'
     @from = options[:since] || 'HEAD^'
@@ -14,7 +20,7 @@ class Netloc
   end
   
   def run
-    command = "git log #{@from}..#{@to}"
+    command = "git log '#{@from}..#{@to}'"
     command << " --numstat"
     command << " --oneline"
     command << " --ignore-all-space"
@@ -33,14 +39,22 @@ class Netloc
     @files = Set.new
     @output.each do | line |
       if line =~ /^(\d+)\s+(\d+)\s+(.*)$/
-        process_line $1, $2, $3
+        process_line $1.to_i, $2.to_i, $3
       elsif line =~ /^<(.*?)> <(.*?)> (.*)$/
+        process_commit $3, $2
         @io.puts "#$1   #$3 (#$2)" if @verbose
       end
     end
-    @io.puts "no activity found." if @files.empty?
+    if @files.empty?
+      @io.puts "no activity found." if @files.empty?
+    else
+      evaluate_commit @commit.merge(:files => @commit_filecount,
+                                    :lines_added => @commit_linesadded,
+                                    :lines_deleted => @commit_linesdeleted)
+    end
+    
   end
-  
+    
   def report
     for label, value in [["app code", @apps],['test code', @tests],['other', @others]] do
       next if value.empty?
@@ -50,6 +64,9 @@ class Netloc
       @io.puts "    #{'%7i' % size_of_changes(value)} lines changed"
       @io.puts "    #{'%+7i' % net} net lines #{ net >= 0 ? 'added' : 'removed'}"
     end
+    @io.puts
+    @io.puts "Commit score:"
+    @scores.each { |s| puts s.to_s }
   end
   
   def net(values)
@@ -61,17 +78,32 @@ class Netloc
   end
   
   def process_line added, removed, file
+    @commit_filecount += 1
+    @commit_linesadded += added
+    @commit_linesdeleted += removed
     @io.puts "processing #{'%+6i'%added.to_i}/#{'%-+6i'%(-removed.to_i)}#{file}" if @verbose
     return if @include && @include !~ file
     @files << file
+    evaluate_file :file => file, :added => added, :removed => removed
     case file
       when @test_regex
         @tests <<  [added.to_i, -removed.to_i]
       when @app_regex
         @apps <<   [added.to_i, -removed.to_i]
       else
-        @others << [added.to_i, removed.to_i]
+        @others << [added.to_i, -removed.to_i]
     end
+  end
+
+  def process_commit description, author
+    if @commit
+      evaluate_commit @commit.merge(:files => @commit_filecount,
+                                    :lines_added => @commit_linesadded,
+                                    :lines_deleted => @commit_linesdeleted)
+    end
+    @commit_filecount = @commit_linesadded = @commit_linesdeleted = 0                                         
+    @commit = {:description => description,
+                :author => author}
   end
   
 end

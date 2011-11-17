@@ -41,4 +41,18 @@ EOF
     assert @io.string !~ /no activity found/
   end
   
+  should "render score formats" do
+    s = []  
+    s << Score.new(100, -3, "bad bad bad")
+    s << Score.new(100, -2, "bad bad")
+    s << Score.new(100, -1, "bad")
+    s << Score.new(100, 3, "good good good")
+    s << Score.new(100, 2, "good good")
+    s << Score.new(100, 1, "good")
+    puts 
+    s.each { |m| puts m.to_s }
+    
+  end
+  
+  
 end

@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
-
+require 'rubygems'
 require 'optparse'
 begin
-#  require 'netloc'
-#rescue LoadError
+  require 'netloc.rb'
+rescue LoadError
   require File.expand_path '../../lib/netloc.rb', __FILE__
 end
 options = {}
