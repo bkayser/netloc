@@ -4,8 +4,9 @@ class Netloc
 
   require 'netloc/score.rb'
   require 'netloc/evaluator.rb'
+  require 'netloc/category.rb'
   
-  attr_reader :scores
+  attr_reader :scores, :categories
   
   def initialize(options)
     @scores = []
@@ -15,8 +16,10 @@ class Netloc
     @verbose = options[:verbose]
     @author = options[:author]
     @include = Regexp.new options[:include] if options.include? :include
-    @app_regex = (options.include? :app_regex) ? Regexp.new(options[:app_regex]) : %r{(^app/)|(\.rb$)}
-    @test_regex = (options.include? :test_regex) ? Regexp.new(options[:test_regex]) : %r{^test/}
+    @categories = []
+    @categories << Category.new('Application Code', ((options.include? :app_regex) ? Regexp.new(options[:app_regex]) : %r{(^app/)|(\.rb$)}))
+    @categories << Category.new('Test Code', ((options.include? :test_regex) ? Regexp.newRegexp.new(options[:test_regex]) : %r{^test/}))
+    @categories << Category.new('Other', /.*/) 
   end
   
   def run
@@ -56,25 +59,20 @@ class Netloc
   end
     
   def report
-    for label, value in [["app code", @apps],['test code', @tests],['other', @others]] do
-      next if value.empty?
-      net = net(value)
-      @io.puts "#{label}:"
-      @io.puts "    #{'%7i' % value.size} files modified"
-      @io.puts "    #{'%7i' % size_of_changes(value)} lines changed"
-      @io.puts "    #{'%+7i' % net} net lines #{ net >= 0 ? 'added' : 'removed'}"
+    for category in categories
+      next if category.files.empty?
+      category.report @io
     end
     @io.puts
-    @io.puts "Commit score:"
-    @scores.each { |s| puts s.to_s }
-  end
-  
-  def net(values)
-    values.flatten.reduce{|a,b| a + b }
-  end
-  
-  def size_of_changes(values)
-    values.flatten.reduce{|a,b| (a > 0 ? a : 0) + (b > 0 ? b : 0) }
+    @scores = Score.squish @scores
+    total_weight = total_score = 0
+    @scores.each do |s| 
+      puts s.to_s 
+      total_weight += s.weight
+      total_score += s.points * s.weight
+    end
+    bottom_line = 50.0 + (10.0 * total_score / total_weight)
+    puts "\nTotal score:  #{bottom_line.to_i}\n"
   end
   
   def process_line added, removed, file
@@ -85,13 +83,11 @@ class Netloc
     return if @include && @include !~ file
     @files << file
     evaluate_file :file => file, :added => added, :removed => removed
-    case file
-      when @test_regex
-        @tests <<  [added.to_i, -removed.to_i]
-      when @app_regex
-        @apps <<   [added.to_i, -removed.to_i]
-      else
-        @others << [added.to_i, -removed.to_i]
+    for category in categories
+      if category.match? file
+        category.add file, added.to_i, removed.to_i
+        break
+      end
     end
   end
 
