@@ -3,8 +3,7 @@ class Netloc::Score
   GOOD = "+"
   BAD = "O"
   
-  attr_accessor :points, :count, :weight, :description, :type
-  
+  attr_accessor :points, :count, :weight, :description, :type, :id
   def initialize weight, points, type, description
     @count = 1
     @type = type
@@ -50,7 +49,7 @@ class Netloc::Score
       else
         '      '
     end
-    s = "#{pattern}  #{@description}"
+    s = "#{pattern.gsub ' ', '.'}  #{@description}"
     s << " (#{@count} occurrences)" if @count > 1
     s
   end

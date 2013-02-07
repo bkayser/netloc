@@ -27,6 +27,13 @@ Is this completely superficial?  Perhaps.  It's really just an experiment, an on
 Right now it just shows some statistics on the "net" lines of code added to application code and test code.  
 Maybe over time we'll figure out some statistics that might provide more insight.
 
+== Update: RPM Integration
+
+I updated the gem to add a New Relic plugin mode.  If you pass it a license key with -l, you can use
+it as a git hook and it will send statistics to New Relic on the last commit.  This feature
+is experimental and still a work in progress as we haven't released the plugin infrastructure in
+production yet.  Send a message to the author if you want to know more.
+
 == Contributing to netloc
 
 Boilerplate, but still relevant:

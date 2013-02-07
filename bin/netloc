@@ -10,6 +10,9 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: #{opts.program_name} [<since> [<until>]] options"
 
+  opts.on('-l newrelic_license_key', "From a git commit hook, send stats on last commit to New Relic.") do | license_key |
+    options[:license_key] = license_key
+  end
   opts.on('-h', "Show thge help version of this gem") do 
     puts opts; exit
   end
@@ -19,6 +22,7 @@ OptionParser.new do |opts|
   opts.on('--author=name', "Limit commits to given author") do | name |
     options[:author] = name
   end
+  opts.on('-n', 'Test mode, show payload only') { options[:test] = true }
   opts.on('--apps=regex', 
           "Regular Expression for matching files to include in application stats; "+
           "default is to match everything under app/ and all *.rb files") do | expr |
@@ -35,6 +39,7 @@ OptionParser.new do |opts|
           "default is to match everything under test/") do | expr |
     options[:app_regex] = expr
   end
+  opts.on('--apihost=hostname') { | host | options[:platform_host] = host }
   opts.separator ""
   opts.separator "example: #{opts.program_name} 'master@{1 week ago}' --author='Bill Kayser' --include=app/models"
   opts.separator ""

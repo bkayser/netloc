@@ -2,10 +2,10 @@ require 'set'
 # Represents the files in a given category matched by a regular expression
 class Netloc::Category
   
-  attr_reader :files, :name, :regex, :lines_added, :lines_removed
+  attr_reader :id, :files, :name, :regex, :lines_added, :lines_removed
 
-  def initialize name, regex
-    @name, @regex = name, regex
+  def initialize id, name, regex
+    @id, @name, @regex = id, name, regex
     @files = Set.new
     @lines_added = @lines_removed = 0
   end
@@ -23,7 +23,7 @@ class Netloc::Category
   def report(io)
     io.puts "#{name}:"
     io.puts "    #{'%7i' % files.size} files modified"
-    io.puts "    #{'%7i' % size_of_changes} lines changed"
+    io.puts "    #{'%7i' % -lines_removed} lines changed"
     io.puts "    #{'%+7i' % net} net lines #{ net >= 0 ? 'added' : 'removed'}"
   end
   
